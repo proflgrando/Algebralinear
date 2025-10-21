@@ -20,7 +20,7 @@ VETOR_B = np.array([32, 23, 33, 31])
 
 # Dados para a Regressão
 X_VETOR = np.array([1, 2, 3, 4, 5])
-Y_VETOR = np.array([2.1, 3.9, 6.1, 7.8, 10.2]) # Quase y = 2x + 0 (mas com ruído)
+Y_VETOR = np.array([2.1, 3.9, 6.1, 7.8, 10.2]) 
 
 
 # --- Funções das Páginas ---
@@ -29,6 +29,8 @@ def pagina_introducao():
     st.title("Aula Interativa: Álgebra Linear e Regressão 📈")
     st.markdown("""
     Bem-vindo! Este aplicativo demonstra como usar **NumPy** para tarefas de Álgebra Linear e como ele se compara ao **Scikit-learn** para Regressão Linear.
+    
+    Cada seção mostrará o **código Python** exato que está sendo executado, seguido pelo seu **resultado**.
     
     Use o menu ao lado para navegar pelas seções da aula.
     """)
@@ -43,57 +45,67 @@ def pagina_fundamentos_matrizes():
     st.markdown("O NumPy é a nossa 'calculadora' para operações com matrizes (arrays 2D).")
 
     st.subheader("1.1: Criação de Matrizes")
-    st.write("Vamos definir nossa matriz `A` (do sistema linear) e uma matriz Identidade `I`:")
+    st.markdown("Este é o código que define nossas matrizes de exemplo:")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("Matriz A (4x4):")
-        st.code(f"A = {MATRIZ_A}")
-    with col2:
-        st.write("Matriz Identidade I (4x4):")
-        B_identidade = np.identity(4)
-        st.code(f"I = {B_identidade}")
+    with st.echo():
+        # Matriz A (4x4)
+        A = np.array([
+            [10, 7, 8, 7],
+            [7, 5, 6, 5],
+            [8, 6, 10, 9],
+            [7, 5, 9, 10]
+        ])
+        
+        # Matriz Identidade I (4x4)
+        I = np.identity(4)
+        
+        st.write("Matriz A (Resultado):")
+        st.code(A)
+        st.write("Matriz I (Resultado):")
+        st.code(I)
 
     st.subheader("1.2: Operações Básicas com Matrizes")
 
-    st.markdown("Veja o que acontece quando realizamos operações:")
-    
     with st.expander("Soma (A + I)"):
-        soma = MATRIZ_A + B_identidade
-        st.code(soma)
+        with st.echo():
+            soma = MATRIZ_A + np.identity(4)
+            st.write("Resultado da Soma:")
+            st.code(soma)
 
     with st.expander("Transposição (A.T)"):
-        A_transposta = MATRIZ_A.T
-        st.code(A_transposta)
+        with st.echo():
+            A_transposta = MATRIZ_A.T
+            st.write("Resultado da Transposição:")
+            st.code(A_transposta)
         
     with st.expander("Produto Matricial (A @ I)"):
-        st.markdown("Usamos `@` para produto matricial. (Note que `A @ I` é igual a `A`).")
-        produto = MATRIZ_A @ B_identidade
-        st.code(produto)
+        st.markdown("Usamos `@` para produto matricial.")
+        with st.echo():
+            produto = MATRIZ_A @ np.identity(4)
+            st.write("Resultado (Note que A @ I = A):")
+            st.code(produto)
 
-    with st.expander("Inversa da Matriz (A⁻¹)"):
-        st.markdown("""
-        A inversa `A⁻¹` é a matriz tal que `A @ A⁻¹ = I`.
-        Usamos `np.linalg.inv(A)`.
-        """)
-        try:
-            A_inversa = np.linalg.inv(MATRIZ_A)
-            st.write("Matriz A Inversa (A⁻¹):")
-            st.code(A_inversa)
-            
-            st.write("Verificação (A @ A⁻¹) - Deve ser a Matriz Identidade:")
-            verificacao = MATRIZ_A @ A_inversa
-            st.code(np.round(verificacao)) # Arredondamos para limpar erros de precisão
+    with st.expander("Inversa da Matriz (A⁻¹)", expanded=True):
+        st.markdown("A inversa `A⁻¹` é a matriz tal que `A @ A⁻¹ = I`.")
+        with st.echo():
+            try:
+                # Usamos np.linalg.inv(A)
+                A_inversa = np.linalg.inv(MATRIZ_A)
+                st.write("Matriz A Inversa (A⁻¹):")
+                st.code(A_inversa)
+                
+                st.write("Verificação (A @ A⁻¹). (Deve ser a Identidade):")
+                verificacao = MATRIZ_A @ A_inversa
+                # Arredondamos para limpar erros de precisão
+                st.code(np.round(verificacao)) 
 
-        except np.linalg.LinAlgError:
-            st.error("A matriz A não possui inversa (é singular).")
+            except np.linalg.LinAlgError:
+                st.error("A matriz A não possui inversa (é singular).")
 
 
 def pagina_sistemas_lineares():
     st.header("PARTE 2: Resolvendo Sistemas Lineares (Ax = b)")
     st.markdown("Queremos resolver o sistema 4x4:")
-    
-    # Exibe a equação em formato LaTeX
     st.latex(r"""
     \begin{cases}
     10x + 7y + 8z + 7w = 32 \\
@@ -104,140 +116,155 @@ def pagina_sistemas_lineares():
     """)
     
     st.subheader("Definindo A e b")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("Matriz A (Coeficientes):")
-        st.code(MATRIZ_A)
-    with col2:
-        st.write("Vetor b (Resultados):")
-        st.code(VETOR_B)
+    st.markdown("Este é o código que define a matriz `A` e o vetor `b`:")
+    with st.echo():
+        A = MATRIZ_A # Usando a variável global
+        b = VETOR_B # Usando a variável global
+        st.write("Matriz A:")
+        st.code(A)
+        st.write("Vetor b:")
+        st.code(b)
         
     st.subheader("Abordagem 1: Usando a Inversa (Ineficiente)")
     st.markdown("Matematicamente, `x = A⁻¹ @ b`. Vamos calcular:")
-    try:
-        A_inv = np.linalg.inv(MATRIZ_A)
-        x_solucao_1 = A_inv @ VETOR_B
-        st.code(f"x = {x_solucao_1}")
-    except np.linalg.LinAlgError:
-        st.error("Método 1 falhou (matriz singular).")
+    with st.echo():
+        try:
+            A_inv = np.linalg.inv(A)
+            x_solucao_1 = A_inv @ b
+            st.write("Solução (x, y, z, w):")
+            st.code(x_solucao_1)
+        except np.linalg.LinAlgError:
+            st.error("Método 1 falhou (matriz singular).")
 
     st.subheader("Abordagem 2: O Jeito Correto (np.linalg.solve)")
-    st.markdown("""
-    Usar a inversa é lento e instável. A forma correta e otimizada no NumPy
-    é usar `np.linalg.solve(A, b)`.
-    """)
-    try:
-        x_solucao_2 = np.linalg.solve(MATRIZ_A, VETOR_B)
-        st.success(f"Solução (x, y, z, w): {x_solucao_2}")
-        st.markdown("A resposta é **[1, 1, 1, 1]**! Esta é a forma preferida.")
-    except np.linalg.LinAlgError:
-        st.error("Método 2 (solve) falhou (matriz singular).")
+    st.markdown("A forma correta e otimizada é `np.linalg.solve(A, b)`.")
+    with st.echo():
+        try:
+            x_solucao_2 = np.linalg.solve(A, b)
+            st.write("Solução (x, y, z, w):")
+            st.success(f"Solução: {x_solucao_2}") # Mostra em caixa verde
+            st.markdown("A resposta é **[1, 1, 1, 1]**!")
+        except np.linalg.LinAlgError:
+            st.error("Método 2 (solve) falhou (matriz singular).")
 
 
 def pagina_regressao_numpy():
     st.header("PARTE 3: Regressão com NumPy (A Equação Normal)")
     st.markdown("Queremos encontrar a linha `y = B0 + B1*x` que melhor se ajusta aos nossos dados.")
     
-    st.subheader("A Fórmula Mágica (Equação Normal)")
+    st.subheader("A Fórmula (Equação Normal)")
     st.latex(r"\theta = (X^T X)^{-1} X^T y")
     st.markdown(r"Onde $\theta$ (theta) é o vetor de parâmetros `[B0, B1]`.")
 
     st.subheader("1. Nossos Dados")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("X (Tamanho m²):")
-        st.code(X_VETOR)
-    with col2:
-        st.write("y (Preço):")
-        st.code(Y_VETOR)
+    with st.echo():
+        X_vetor = np.array([1, 2, 3, 4, 5])
+        y_vetor = np.array([2.1, 3.9, 6.1, 7.8, 10.2])
+        st.write("Vetor X (Tamanho m²):")
+        st.code(X_vetor)
+        st.write("Vetor y (Preço):")
+        st.code(y_vetor)
 
     st.subheader("2. Preparar a Matriz Design (X_design)")
-    st.markdown("""
-    A fórmula precisa de uma coluna de '1s' em X para calcular o intercepto (B0).
-    Usamos `np.c_[np.ones(...), X_vetor]` para criar:
-    """)
-    X_design = np.c_[np.ones(X_VETOR.shape[0]), X_VETOR]
-    st.code(X_design)
+    st.markdown("A fórmula precisa de uma coluna de '1s' em X para calcular o intercepto (B0).")
+    with st.echo():
+        # np.c_ é um truque para concatenar colunas
+        X_design = np.c_[np.ones(X_vetor.shape[0]), X_vetor]
+        st.write("Matriz Design (com coluna de 1s):")
+        st.code(X_design)
     
     st.subheader("3. Aplicando a Fórmula Passo a Passo")
     
     with st.expander("Passo 1: X Transposto (XT)"):
-        XT = X_design.T
-        st.code(XT)
+        with st.echo():
+            XT = X_design.T
+            st.write("Resultado (XT):")
+            st.code(XT)
         
     with st.expander("Passo 2: XT @ X"):
-        XTX = XT @ X_design
-        st.code(XTX)
+        with st.echo():
+            XTX = XT @ X_design
+            st.write("Resultado (XTX):")
+            st.code(XTX)
         
     with st.expander("Passo 3: Inversa de (XT @ X)"):
-        XTX_inv = np.linalg.inv(XTX)
-        st.code(XTX_inv)
+        with st.echo():
+            XTX_inv = np.linalg.inv(XTX)
+            st.write("Resultado (XTX_inv):")
+            st.code(XTX_inv)
         
     with st.expander("Passo 4: XT @ y"):
-        XTy = XT @ Y_VETOR
-        st.code(XTy)
+        with st.echo():
+            XTy = XT @ y_vetor
+            st.write("Resultado (XTy):")
+            st.code(XTy)
         
     st.subheader("4. Resultado Final (Theta)")
     st.markdown("`theta = (Passo 3) @ (Passo 4)`")
-    theta = XTX_inv @ XTy
-    
-    st.success(f"Theta (B0, B1): {theta}")
-    st.markdown(f"**Equação da Linha: y = {theta[0]:.4f} + {theta[1]:.4f} * x**")
+    with st.echo():
+        # Juntando os passos anteriores
+        XT = X_design.T
+        XTX = XT @ X_design
+        XTX_inv = np.linalg.inv(XTX)
+        XTy = XT @ y_vetor
+        theta = XTX_inv @ XTy
+        
+        st.success(f"Theta (B0, B1): {theta}")
+        st.markdown(f"**Equação da Linha: y = {theta[0]:.4f} + {theta[1]:.4f} * x**")
 
 
 def pagina_regressao_sklearn():
     st.header("PARTE 4: Regressão com Scikit-learn (O Jeito Fácil)")
-    st.markdown("""
-    O Scikit-learn (sklearn) é a biblioteca padrão para Machine Learning.
-    Ela esconde toda a complexidade da Equação Normal em duas linhas: `.fit()` e `.predict()`.
-    """)
+    st.markdown("O Scikit-learn (sklearn) esconde toda essa complexidade.")
     
     st.subheader("1. Preparar os Dados para o Sklearn")
-    st.markdown("""
-    O Sklearn exige que X seja uma matriz 2D (mesmo com uma só feature).
-    Usamos `.reshape(-1, 1)` para transformar `[1, 2, 3]` em `[[1], [2], [3]]`.
-    """)
-    X_sklearn = X_VETOR.reshape(-1, 1)
-    st.code(X_sklearn)
+    st.markdown("O Sklearn exige que X seja uma matriz 2D. Usamos `.reshape(-1, 1)`.")
+    with st.echo():
+        X_vetor = X_VETOR # Pega o vetor 1D
+        X_sklearn = X_vetor.reshape(-1, 1)
+        st.write("Vetor X original:")
+        st.code(X_vetor)
+        st.write("Vetor X formatado para Sklearn (2D):")
+        st.code(X_sklearn)
     
     st.subheader("2. Criar e Treinar o Modelo")
     st.markdown("Este é o 'coração' do sklearn:")
-    st.code("""
-from sklearn.linear_model import LinearRegression
+    with st.echo():
+        # Importa a classe
+        from sklearn.linear_model import LinearRegression
 
-modelo = LinearRegression()
-modelo.fit(X_sklearn, Y_VETOR)
-    """)
-    # Treinamento real (nos bastidores)
-    modelo = LinearRegression()
-    modelo.fit(X_sklearn, Y_VETOR)
+        # 1. Cria o modelo
+        modelo = LinearRegression()
+        
+        # 2. Treina o modelo (aqui ele calcula a Equação Normal)
+        modelo.fit(X_sklearn, Y_VETOR)
+        
+        st.info("Modelo treinado com sucesso!")
     
     st.subheader("3. Ver os Resultados")
-    intercepto_sklearn = modelo.intercept_
-    coeficiente_sklearn = modelo.coef_
-    
-    st.success(f"Intercepto (B0): {intercepto_sklearn:.4f}")
-    st.success(f"Coeficiente (B1): {coeficiente_sklearn[0]:.4f}")
+    with st.echo():
+        intercepto_sklearn = modelo.intercept_
+        coeficiente_sklearn = modelo.coef_
+        
+        st.success(f"Intercepto (B0): {intercepto_sklearn:.4f}")
+        st.success(f"Coeficiente (B1): {coeficiente_sklearn[0]:.4f}")
     
     
 def pagina_conclusao():
     st.header("Conclusão: NumPy vs. Scikit-learn")
     st.markdown("Vamos comparar os resultados da Regressão Linear:")
 
-    # Recalcula o NumPy
+    # --- Recálculos (para garantir que os dados estejam aqui) ---
+    # NumPy
     X_design = np.c_[np.ones(X_VETOR.shape[0]), X_VETOR]
-    XT = X_design.T
-    XTX = XT @ X_design
-    XTX_inv = np.linalg.inv(XTX)
-    XTy = XT @ Y_VETOR
-    theta = XTX_inv @ XTy
+    theta = np.linalg.inv(X_design.T @ X_design) @ X_design.T @ Y_VETOR
     
-    # Recalcula o Sklearn
+    # Sklearn
     X_sklearn = X_VETOR.reshape(-1, 1)
-    modelo = LinearRegression()
-    modelo.fit(X_sklearn, Y_VETOR)
+    modelo = LinearRegression().fit(X_sklearn, Y_VETOR)
     intercepto_sklearn = modelo.intercept_
     coeficiente_sklearn = modelo.coef_
+    # --- Fim dos Recálculos ---
     
     col1, col2 = st.columns(2)
     with col1:
